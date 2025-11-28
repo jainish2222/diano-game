@@ -9,7 +9,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/select-game" element={<Selectgamepage />} />
-        <Route path="/selected-game/:id" element={<Gamepage />} />
+        <Route path="/selected-game/:themeParam" element={<Gamepage />} />
       </Routes>
     </BrowserRouter>
   );

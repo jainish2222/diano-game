@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import ThemePopup from "../components/ThemePopup"; 
 import { ThemeContext } from "../components/ThemeProvider";
 import { useNavigate } from "react-router-dom";
+
 export default function SpaceHome() {
   const canvasRef = useRef(null);
   const [showThemePopup, setShowThemePopup] = useState(false);
@@ -65,11 +66,11 @@ export default function SpaceHome() {
         <div className="w-80 md:w-96 m-10 p-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.15)] text-white">
 
           <h1 className="text-3xl font-extrabold tracking-wider text-center mb-1 drop-shadow">
-            Among Space
+            Dino Space
           </h1>
 
           <p className="text-center text-xs opacity-70 mb-6">
-            Explore the Cosmos
+            Explore the Dino World
           </p>
 
           {/* MENU BUTTONS */}
@@ -80,7 +81,7 @@ export default function SpaceHome() {
                 onClick={() => {
                   if (name === "Start Game") navigate('/select-game');
                   if (name === "Theme") setShowThemePopup(true);
-                  if(name === "About Game") alert("Among Space v1.0.0\n© 2025 Among Space");
+                  if (name === "About Game") alert("Dino Space v1.0.0\n© 2025 Dino Space");
                 }}
                 className={`
                   w-full flex items-center justify-center 
@@ -100,12 +101,12 @@ export default function SpaceHome() {
 
           {/* Footer */}
           <p className="text-center text-[10px] mt-6 opacity-60 tracking-wider">
-            v1.0.0 · © 2025 Among Space
+            v1.0.0 · © 2025 Dino Space
           </p>
         </div>
       </div>
 
-      {/* THEME POPUP (separate component) */}
+      {/* THEME POPUP */}
       {showThemePopup && (
         <ThemePopup
           onClose={() => setShowThemePopup(false)}
