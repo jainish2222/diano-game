@@ -5,11 +5,11 @@ import { createContext, useEffect, useState } from "react";
 export const ThemeContext = createContext();
 
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("system");
+  const [theme, setTheme] = useState("light");
 
   // Load saved
   useEffect(() => {
-    const saved = localStorage.getItem("app-theme") || "system";
+    const saved = localStorage.getItem("app-theme") || "light";
     setTheme(saved);
   }, []);
 

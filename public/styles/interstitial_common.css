@@ -515,3 +515,10 @@ input[type=checkbox]:checked ~ .checkbox::before {
     padding-inline-start: 0;
   }
 }
+html.light body {
+  background: #fff !important;
+}
+
+html.dark body {
+  background: #000 !important;
+}

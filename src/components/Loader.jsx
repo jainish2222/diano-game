@@ -1,65 +1,41 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import dragonFire from "../data/dragon-fire.json"; // keep your path
+import { ThemeContext } from "../components/theme/ThemeProvider";
+import dragonFire from "../data/dragon-fire.json";
 
-// Orbitron font
 const fontStyle = {
   fontFamily: "'Orbitron', sans-serif",
 };
 
 export default function DragonPage() {
-  const [darkMode, setDarkMode] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [showPopup, setShowPopup] = useState(false);
-  const [mode, setMode] = useState("dragon");
-
   const navigate = useNavigate();
 
-  // MODE CONFIG + colors + captions + html mapping
+  const { theme } = useContext(ThemeContext);
+  const [progress, setProgress] = useState(0);
+  const [mode, setMode] = useState("dragon");
+
+  // Resolve current theme (system aware)
+  const resolvedTheme =
+    theme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+
   const modeConfig = {
-    hurdling: {
-      title: "Inferno Sprint",
-      caption: "Charging sprint flames...",
-      tailwind: "bg-blue-500",
-      file: "1_hurdling.html",
-    },
-    gymnastics: {
-      title: "Ember Acrobatics",
-      caption: "Warming up acrobatic fire...",
-      tailwind: "bg-green-500",
-      file: "2_gymnastics.html",
-    },
-    surfing: {
-      title: "Ocean Blaze",
-      caption: "Summoning ocean winds...",
-      tailwind: "bg-lime-500",
-      file: "3_surfing.html",
-    },
-    swimming: {
-      title: "Shadow Swimmer",
-      caption: "Calibrating underwater senses...",
-      tailwind: "bg-orange-500",
-      file: "4_swimming.html",
-    },
-    equestrian: {
-      title: "Inferno Gallop",
-      caption: "Synchronizing rider speed...",
-      tailwind: "bg-cyan-500",
-      file: "5_equestrian.html",
-    },
-    dragon: {
-      title: "Dragon Awakening",
-      caption: "Summoning dragon flames...",
-      tailwind: "bg-gray-500",
-      file: null,
-    },
+    hurdling: { file: "1_hurdling.html" },
+    gymnastics: { file: "2_gymnastics.html" },
+    surfing: { file: "3_surfing.html" },
+    swimming: { file: "4_swimming.html" },
+    equestrian: { file: "5_equestrian.html" },
+    dragon: { file: null },
   };
 
   const selected = modeConfig[mode];
 
-  // Progress bar
+  // Loader progress
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => (prev >= 100 ? 100 : prev + 1.5));
@@ -67,28 +43,32 @@ export default function DragonPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Redirect when loaded
+  // When complete → navigate
   useEffect(() => {
     if (progress === 100 && selected.file) {
       navigate(`/play/${mode}`);
     }
-  }, [progress, mode]);
+  }, [progress]);
 
   return (
     <div
       style={fontStyle}
-      className={`w-screen h-screen flex flex-col items-center justify-center px-4 transition-colors duration-500 ${
-        darkMode ? "bg-black text-white" : "bg-white text-black"
-      }`}
+      className={`
+        w-screen h-screen flex flex-col items-center justify-center px-4
+        transition-colors duration-500 
+        ${resolvedTheme === "dark" ? "bg-black text-white" : "bg-white text-black"}
+      `}
     >
-      <div className="w-60 h-60 sm:w-72 sm:h-72 flex items-center justify-center mb-5">
+      {/* LOADER */}
+      <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center mb-5">
         <Lottie
           animationData={dragonFire}
           loop
           autoplay
-          className="w-52 h-52 sm:w-64 sm:h-64"
+          className="w-16 h-16 sm:w-24 sm:h-24"
         />
-      </div>     
+      </div>
+
     </div>
   );
 }

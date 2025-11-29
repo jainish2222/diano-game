@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useContext } from "react";
-import ThemePopup from "../components/ThemePopup"; 
-import { ThemeContext } from "../components/ThemeProvider";
+import ThemePopup from "../components/theme/ThemePopup";
+import { ThemeContext } from "../components/theme/ThemeProvider";
 import { useNavigate } from "react-router-dom";
 
 export default function SpaceHome() {
@@ -9,6 +9,14 @@ export default function SpaceHome() {
   const [showThemePopup, setShowThemePopup] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useContext(ThemeContext);
+
+  // resolve system theme
+  const resolvedTheme =
+    theme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
 
   // Falling Stars Background
   useEffect(() => {
@@ -33,7 +41,9 @@ export default function SpaceHome() {
 
     function animate() {
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#fff";
+
+      // ⭐ FIX: Star color depends on theme
+      ctx.fillStyle = resolvedTheme === "light" ? "#000" : "#fff";
 
       stars.forEach((s) => {
         ctx.globalAlpha = s.opacity;
@@ -51,21 +61,40 @@ export default function SpaceHome() {
     animate();
 
     return () => window.removeEventListener("resize", setSize);
-  }, []);
+  }, [resolvedTheme]); // ⭐ Update stars when theme changes
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-black relative">
+    <div
+      className={`
+        w-screen h-screen overflow-hidden relative
+        transition-all duration-300
+        ${
+          resolvedTheme === "light"
+            ? "bg-white text-black"
+            : "bg-black text-white"
+        }
+      `}
+    >
       {/* Falling Stars */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-[100%] h-[100%]" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
       {/* Center Menu */}
       <div
         className="absolute inset-0 flex items-center justify-center"
         style={{ fontFamily: "'Orbitron', sans-serif" }}
       >
-        <div className="w-80 md:w-96 m-10 p-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.15)] text-white">
-
-          <h1 className="text-3xl font-extrabold tracking-wider text-center mb-1 drop-shadow">
+        <div
+          className={`
+            w-80 md:w-96 m-10 p-8 rounded-2xl backdrop-blur-xl border shadow-xl
+            transition-all duration-300
+            ${
+              resolvedTheme === "light"
+                ? "bg-black/5 border-black/20 text-black"
+                : "bg-white/5 border-white/20 text-white"
+            }
+          `}
+        >
+          <h1 className="text-3xl font-extrabold tracking-wider text-center mb-1">
             Dino Space
           </h1>
 
@@ -73,33 +102,53 @@ export default function SpaceHome() {
             Explore the Dino World
           </p>
 
-          {/* MENU BUTTONS */}
+          {/* Buttons */}
           <div className="space-y-3">
-            {["Start Game", "Theme", "About Game"].map((name, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  if (name === "Start Game") navigate('/select-game');
-                  if (name === "Theme") setShowThemePopup(true);
-                  if (name === "About Game") alert("Dino Space v1.0.0\n© 2025 Dino Space");
-                }}
-                className={`
-                  w-full flex items-center justify-center 
-                  px-4 py-3 rounded-lg 
-                  transition-all text-sm font-semibold tracking-wide 
-                  hover:scale-[1.03] active:scale-[0.97]
+            {["Start Game", "Theme", "About Game"].map((name, i) => {
+              // ✅ Define hover colors here (inside map, OUTSIDE JSX)
+              const hoverColors = {
+                0:
+                  resolvedTheme === "light"
+                    ? "hover:bg-red-500/20 active:bg-red-500/40"
+                    : "hover:bg-red-900/60 active:bg-red-900",
 
-                  ${i === 0 ? "bg-white/5 hover:bg-red-900/60 active:bg-red-900" : ""}
-                  ${i === 1 ? "bg-white/5 hover:bg-violet-900/60 active:bg-violet-900" : ""}
-                  ${i === 2 ? "bg-white/5 hover:bg-lime-900/60 active:bg-lime-900" : ""}
-                `}
-              >
-                {name}
-              </button>
-            ))}
+                1:
+                  resolvedTheme === "light"
+                    ? "hover:bg-violet-500/20 active:bg-violet-500/40"
+                    : "hover:bg-violet-900/60 active:bg-violet-900",
+
+                2:
+                  resolvedTheme === "light"
+                    ? "hover:bg-lime-500/20 active:bg-lime-500/40"
+                    : "hover:bg-lime-900/60 active:bg-lime-900",
+              }[i];
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (name === "Start Game") navigate("/select-game");
+                    if (name === "Theme") setShowThemePopup(true);
+                    if (name === "About Game") navigate("/about");
+                      
+                  }}
+                  className={`
+          w-full px-4 py-3 rounded-lg font-semibold tracking-wide
+          transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]
+          ${
+            resolvedTheme === "light"
+              ? "bg-black/10 text-black"
+              : "bg-white/10 text-white"
+          }
+          ${hoverColors}
+        `}
+                >
+                  {name}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Footer */}
           <p className="text-center text-[10px] mt-6 opacity-60 tracking-wider">
             v1.0.0 · © 2025 Dino Space
           </p>

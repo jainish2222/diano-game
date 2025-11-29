@@ -11,7 +11,7 @@ export default function ThemePopup({ onClose, setTheme, currentTheme }) {
         </h2>
 
         <div className="space-y-3">
-          {["light", "dark", "system"].map((mode) => (
+          {["light", "dark"].map((mode) => (
             <button
               key={mode}
               onClick={() => {
