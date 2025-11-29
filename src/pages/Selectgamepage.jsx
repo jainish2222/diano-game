@@ -19,7 +19,7 @@ export default function Selectgamepage() {
   // Active selected index
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-  // Resolve system theme
+  // Resolve theme
   const resolvedTheme =
     theme === "system"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -27,7 +27,7 @@ export default function Selectgamepage() {
         : "light"
       : theme;
 
-  // Game modes
+  // Game List
   const modes = [
     { name: "Hurdling", icon: HurdleIcon },
     { name: "Gymnastics", icon: GymnasticsIcon },
@@ -37,7 +37,7 @@ export default function Selectgamepage() {
     { name: "Dinosaur", icon: DinoIcon },
   ];
 
-  // Solid background colors
+  // Solid colors
   const colorList = [
     "bg-lime-500",
     "bg-yellow-400",
@@ -45,6 +45,16 @@ export default function Selectgamepage() {
     "bg-red-500",
     "bg-pink-500",
     "bg-purple-500",
+  ];
+
+  // STATIC hover colors (Tailwind needs these!)
+  const hoverColors = [
+    "hover:bg-lime-500",
+    "hover:bg-yellow-400",
+    "hover:bg-blue-500",
+    "hover:bg-red-500",
+    "hover:bg-pink-500",
+    "hover:bg-purple-500",
   ];
 
   return (
@@ -56,7 +66,6 @@ export default function Selectgamepage() {
           absolute top-4 left-4 z-50 flex items-center gap-2
           px-4 py-2 rounded-lg 
           backdrop-blur-md border transition-all active:scale-95
-
           ${
             resolvedTheme === "light"
               ? "bg-black/10 border-black/20 text-black hover:bg-black/20"
@@ -83,7 +92,6 @@ export default function Selectgamepage() {
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-md p-6">
           {modes.map((item, index) => {
-            const hoverColor = `hover:${colorList[index]}`;
             const activeColor = selectedIndex === index ? colorList[index] : "";
 
             return (
@@ -105,7 +113,7 @@ export default function Selectgamepage() {
                       : "bg-white/10 border-white/20 text-white"
                   }
 
-                  ${hoverColor}
+                  ${hoverColors[index]}
                   ${activeColor}
                   hover:text-white
                 `}
