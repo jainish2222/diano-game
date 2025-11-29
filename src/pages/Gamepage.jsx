@@ -361,7 +361,7 @@ function Gamepage() {
   return (
     <>
       <div
-        className="absolute top-4 left-1/2 -translate-x-1/2 z-50 
+        className="absolute top-10 left-1/2 -translate-x-1/2 z-50 
                ]px-4 py-2 select-none"
       >
         Tap on screen to jump
