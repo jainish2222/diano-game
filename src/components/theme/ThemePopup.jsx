@@ -20,7 +20,7 @@ export default function ThemePopup({ onClose, setTheme, currentTheme }) {
               }}
               className={`
                 w-full py-2 rounded-lg transition
-                ${currentTheme === mode ? "bg-white/30" : "bg-white/10 hover:bg-white/20"}
+                ${currentTheme === mode ? "bg-white/30 border-1" : "bg-white/10 hover:bg-white/20"}
               `}
             >
               {mode.charAt(0).toUpperCase() + mode.slice(1)}

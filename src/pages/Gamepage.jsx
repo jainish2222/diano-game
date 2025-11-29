@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import Loader from "../components/Loader";
+import TransactionStatus from "../components/TransactionStatus";
 /* ----------------------  YOUR SAME PAGE DATA LOGIC  ---------------------- */
 function buildPageData(themeKey, base) {
   const common = {
@@ -151,7 +152,7 @@ const waitForCanvas = () =>
     check();
   });
 const waitForOfflineResources = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const check = () => {
       const div = document.getElementById("offline-resources");
       if (div) resolve();
@@ -170,39 +171,59 @@ const waitForSpriteImages = async () =>
 ========================================================================= */
 function Gamepage() {
   const { themeParam } = useParams() || {};
-
+  const [showGameOverPopup, setShowGameOverPopup] = useState(false);
   const [theme, setTheme] = useState("hurdling");
   const [isLoading, setIsLoading] = useState(true);
   const runnerRef = useRef(null);
   const base = ""; // unchanged
-useEffect(() => {
-  if (typeof window === "undefined") return;
+  // const [showGameOverPopup, setShowGameOverPopup] = useState(false);
 
-  // 1. Destroy old runner instance
-  const inst = window.Runner?.instance_;
-  if (inst) {
-    try { inst.stop(); } catch {}
-    try { inst.stopListening(); } catch {}
+  useEffect(() => {
+    const handler = () => {
+      console.log("Dino game over detected");
+      setShowGameOverPopup(true);
+    };
 
-    const outer = inst.outerContainerEl;
-    [inst.containerEl, inst.slowSpeedCheckboxLabel, inst.touchController].forEach(el => {
-      if (el && outer?.contains(el)) outer.removeChild(el);
-    });
+    window.addEventListener("dino-game-over", handler);
 
-    window.Runner.instance_ = null;
-  }
+    return () => window.removeEventListener("dino-game-over", handler);
+  }, []);
 
-  // 2. Start new runner instance after small delay
-  setTimeout(() => {
-    const wrapper = document.querySelector(".interstitial-wrapper");
-    if (wrapper && window.Runner) {
-      window.Runner.instance_ = new window.Runner(".interstitial-wrapper");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // 1. Destroy old runner instance
+    const inst = window.Runner?.instance_;
+    if (inst) {
+      try {
+        inst.stop();
+      } catch {}
+      try {
+        inst.stopListening();
+      } catch {}
+
+      const outer = inst.outerContainerEl;
+      [
+        inst.containerEl,
+        inst.slowSpeedCheckboxLabel,
+        inst.touchController,
+      ].forEach((el) => {
+        if (el && outer?.contains(el)) outer.removeChild(el);
+      });
+
+      window.Runner.instance_ = null;
     }
-  }, 0);
 
-}, [themeParam]);   // 👈 reload only when URL param changes
+    // 2. Start new runner instance after small delay
+    setTimeout(() => {
+      const wrapper = document.querySelector(".interstitial-wrapper");
+      if (wrapper && window.Runner) {
+        window.Runner.instance_ = new window.Runner(".interstitial-wrapper");
+      }
+    }, 0);
+  }, [themeParam]); // 👈 reload only when URL param changes
 
-   console.log("Theme Param:", themeParam);
+  console.log("Theme Param:", themeParam);
 
   /* Sync theme from URL param */
   useEffect(() => {
@@ -281,91 +302,109 @@ useEffect(() => {
   };
 
   /* ----------------------  FIXED RUNNER INITIALIZATION  ---------------------- */
-useEffect(() => {
-  if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  let cancelled = false;
+    let cancelled = false;
 
-  (async () => {
-    try {
-      // 1. Load scripts
-      await loadDinoCoreOnce(base);
-      if (cancelled) return;
+    (async () => {
+      try {
+        // 1. Load scripts
+        await loadDinoCoreOnce(base);
+        if (cancelled) return;
 
-      // 2. Ensure <div id="offline-resources"> exists
-      await waitForOfflineResources();
+        // 2. Ensure <div id="offline-resources"> exists
+        await waitForOfflineResources();
 
-      // 3. Build updated page data
-      const pageData = buildPageData(theme, base);
+        // 3. Build updated page data
+        const pageData = buildPageData(theme, base);
 
-      // 4. Inject loadTimeData
-      window.loadTimeData.data_ = {
-        ...(window.loadTimeData.data_ || {}),
-        ...pageData,
-      };
+        // 4. Inject loadTimeData
+        window.loadTimeData.data_ = {
+          ...(window.loadTimeData.data_ || {}),
+          ...pageData,
+        };
 
-      // 5. Ensure images exist in DOM
-      ensureResourceImages(pageData);
+        // 5. Ensure images exist in DOM
+        ensureResourceImages(pageData);
 
-      // 6. Destroy old runner instance
-      const old = window.Runner?.instance_;
-      if (old) {
-        old.stop?.();
-        old.stopListening?.();
-        window.Runner.instance_ = null;
+        // 6. Destroy old runner instance
+        const old = window.Runner?.instance_;
+        if (old) {
+          old.stop?.();
+          old.stopListening?.();
+          window.Runner.instance_ = null;
+        }
+
+        // 7. Wait for canvas
+        await waitForCanvas();
+
+        // 8. Wait for images to load
+        await waitForSpriteImages();
+
+        // 9. Create new runner safely
+        if (!cancelled) {
+          runnerRef.current = new window.Runner(".interstitial-wrapper");
+        }
+      } catch (err) {
+        console.error("Runner setup error:", err);
       }
+    })();
 
-      // 7. Wait for canvas
-      await waitForCanvas();        
-
-      // 8. Wait for images to load
-      await waitForSpriteImages();  
-
-      // 9. Create new runner safely
-      if (!cancelled) {
-        runnerRef.current = new window.Runner(".interstitial-wrapper");
-      }
-    } catch (err) {
-      console.error("Runner setup error:", err);
-    }
-  })();
-
-  return () => {
-    cancelled = true;
-  };
-}, [theme]);
-
+    return () => {
+      cancelled = true;
+    };
+  }, [theme]);
 
   if (isLoading) return <Loader />;
 
   return (
-    <div id="t" className="neterror offline" style={{ fontSize: "75%" }}>
-      <div id="main-frame-error" className="interstitial-wrapper">
-        <div id="main-content">
-          <div className="icon icon-offline" style={{ visibility: "hidden" }} />
-          <h1>
-            <span id="heading.msg">Press space/up to play</span>
-          </h1>
+    <>
+      <div
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-50 
+               ]px-4 py-2 select-none"
+      >
+        Tap on screen to jump
+      </div>
+
+      <div id="t" className="neterror offline" style={{ fontSize: "75%" }}>
+        <div id="main-frame-error" className="interstitial-wrapper">
+          <div id="main-content">
+            <div
+              className="icon icon-offline"
+              style={{ visibility: "hidden" }}
+            />
+            <h1>
+              <span id="heading.msg">Press space/up to play</span>
+            </h1>
+          </div>
+
+          <div role="application" tabIndex={0} className="runner-container">
+            <canvas
+              className="runner-canvas"
+              width="552"
+              height="150"
+              style={{ width: "552px", height: "150px" }}
+            />
+          </div>
         </div>
 
-        <div role="application" tabIndex={0} className="runner-container">
-          <canvas
-            className="runner-canvas"
-            width="552"
-            height="150"
-            style={{ width: "552px", height: "150px" }}
-          />
+        <div id="offline-resources">
+          <template id="audio-resources">{/*  */}</template>
         </div>
       </div>
 
-      <div id="offline-resources">
-        <template id="audio-resources">
-          <audio id="offline-sound-press" />
-          <audio id="offline-sound-hit" />
-          <audio id="offline-sound-reached" />
-        </template>
-      </div>
-    </div>
+      {showGameOverPopup && (
+        <TransactionStatus
+          open={showGameOverPopup}
+          status="failed"
+          title="Game Over!"
+          description="Your dinosaur crashed! If you want to play again, please complete the transaction."
+          onClose={() => setShowGameOverPopup(false)}
+          // onAction={() => navigate("/payment")}  // optional
+        />
+      )}
+    </>
   );
 }
 

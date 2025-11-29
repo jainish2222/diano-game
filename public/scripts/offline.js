@@ -1210,6 +1210,7 @@ Runner.prototype = {
         this.restart();
       }
     }
+   
   },
 
   /**
@@ -1343,6 +1344,7 @@ Runner.prototype = {
     }
     this.showSpeedToggle();
     this.disableSpeedToggle(false);
+    window.dispatchEvent(new Event("dino-game-over"));
   },
 
   stop() {
