@@ -183,7 +183,7 @@ const waitForSpriteImages = async () => {
   );
 };
 
-function App() {
+function Gamepage() {
   const [theme, setTheme] = useState("hurdling");
   const [isLoading, setIsLoading] = useState(true);
   const { themeParam } = useParams() || {};
@@ -191,17 +191,20 @@ function App() {
   const base = ""; // base left empty, public/ is root
 
   useEffect(() => {
-    if (!themeParam) return;
-    const validThemes = [
-      "hurdling",
-      "gymnastics",
-      "surfing",
-      "swimming",
-      "equestrian",
-      "dinosaur",
-    ];
-    if (validThemes.includes(themeParam)) setTheme(themeParam);
-  }, [themeParam]);
+  const validThemes = [
+    "hurdling",
+    "gymnastics",
+    "surfing",
+    "swimming",
+    "equestrian",
+    "dinosaur",
+  ];
+
+  if (validThemes.includes(themeParam)) {
+    setTheme(themeParam);
+  }
+}, [themeParam]);
+
 
   // Load CSS only once and from /styles in public
   // useEffect(() => {
@@ -288,8 +291,6 @@ function App() {
         link.parentNode.removeChild(link);
       }
     });
-  // window.location.reload();
-
   };
 }, []);
 
@@ -399,7 +400,7 @@ useEffect(() => {
       // ---- SAFE START NEW RUNNER ----await waitForSpriteImages();   // ⬅️ IMPORTANT FIX
 
       await waitForSpriteImages();   // ⬅️ IMPORTANT FIX
-     const newInstance = new window.Runner(".interstitial-wrapper");
+const newInstance = new window.Runner(".interstitial-wrapper");
       runnerRef.current = newInstance;
 
     } catch (err) {
@@ -441,14 +442,14 @@ useEffect(() => {
             </h1>
             <h2>
               Change theme:{" "}
-              <select id="themeDino" onChange={handleThemeChange} value={theme}>
+              {/* <select id="themeDino" onChange={handleThemeChange} value={theme}>
                 <option value="hurdling">Olympic hurdling</option>
                 <option value="gymnastics">Olympic gymnastics</option>
                 <option value="surfing">Olympic surfing</option>
                 <option value="swimming">Olympic swimming</option>
                 <option value="equestrian">Olympic equestrian</option>
                 <option value="default">Original</option>
-              </select>
+              </select> */}
               <br />
               (No page refresh needed)
             </h2>
@@ -493,4 +494,4 @@ useEffect(() => {
   );
 }
 
-export default App;
+export default Gamepage;
